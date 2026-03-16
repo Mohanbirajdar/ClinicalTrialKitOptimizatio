@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { runAlertScan } from "@/lib/alert-engine";
 import { successResponse, serverError } from "@/lib/api-response";
 
