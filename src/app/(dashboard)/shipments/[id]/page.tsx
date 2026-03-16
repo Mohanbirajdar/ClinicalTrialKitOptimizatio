@@ -110,8 +110,8 @@ export default function ShipmentDetailPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-4">
             <CardTitle>Shipment Tracking</CardTitle>
-            <Badge variant={statusColors[shipment.status] || "secondary"}>
-              {shipment.status.replace("_", " ")}
+            <Badge variant={statusColors[shipment.status ?? "preparing"] || "secondary"}>
+              {(shipment.status ?? "preparing").replace("_", " ")}
             </Badge>
           </CardHeader>
           <CardContent>

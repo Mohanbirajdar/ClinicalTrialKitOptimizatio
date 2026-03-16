@@ -76,7 +76,7 @@ export default async function TrialsPage() {
                         <Badge variant={phaseColors[trial.trial_phase] || "outline"}>{trial.trial_phase}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={statusColors[trial.status] || "secondary"}>{trial.status}</Badge>
+                        <Badge variant={statusColors[trial.status ?? "planning"] || "secondary"}>{trial.status ?? "planning"}</Badge>
                       </TableCell>
                       <TableCell>{trial.sponsor || "—"}</TableCell>
                       <TableCell>{formatDate(trial.start_date)}</TableCell>

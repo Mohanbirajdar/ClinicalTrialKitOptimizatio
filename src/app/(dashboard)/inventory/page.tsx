@@ -79,7 +79,7 @@ export default async function InventoryPage() {
                           <span className={kit.quantity < 10 ? "text-red-600 font-bold" : ""}>{kit.quantity}</span>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={statusColors[kit.status] || "secondary"}>{kit.status.replace("_", " ")}</Badge>
+                          <Badge variant={statusColors[kit.status ?? "available"] || "secondary"}>{(kit.status ?? "available").replace("_", " ")}</Badge>
                         </TableCell>
                         <TableCell>{formatDate(kit.manufacturing_date)}</TableCell>
                         <TableCell>{formatDate(kit.expiry_date)}</TableCell>

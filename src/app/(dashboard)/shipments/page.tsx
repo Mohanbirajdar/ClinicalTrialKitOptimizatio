@@ -67,7 +67,7 @@ export default async function ShipmentsPage() {
                       </TableCell>
                       <TableCell>{(s as any).kit?.kit_type || "—"}</TableCell>
                       <TableCell className="font-medium">{s.quantity}</TableCell>
-                      <TableCell><Badge variant={statusColors[s.status] || "secondary"}>{s.status.replace("_", " ")}</Badge></TableCell>
+                      <TableCell><Badge variant={statusColors[s.status ?? "preparing"] || "secondary"}>{(s.status ?? "preparing").replace("_", " ")}</Badge></TableCell>
                       <TableCell>{formatDate(s.shipment_date)}</TableCell>
                       <TableCell>{formatDate(s.expected_delivery_date)}</TableCell>
                       <TableCell className="font-mono text-xs">{s.tracking_number || "—"}</TableCell>

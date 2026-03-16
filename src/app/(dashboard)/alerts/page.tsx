@@ -214,7 +214,7 @@ export default function AlertsPage() {
                 ) : (
                   alerts.map((alert) => {
                     const config =
-                      severityConfig[alert.severity] || severityConfig.info;
+                      severityConfig[alert.severity ?? "info"] || severityConfig.info;
                     const Icon = config.icon;
                     return (
                       <TableRow
@@ -226,7 +226,7 @@ export default function AlertsPage() {
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className="text-xs font-normal">
-                            {alertTypeLabels[alert.alert_type] || alert.alert_type}
+                            {alertTypeLabels[alert.alert_type ?? "low_stock"] || alert.alert_type}
                           </Badge>
                         </TableCell>
                         <TableCell>

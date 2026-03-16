@@ -24,7 +24,7 @@ export function AlertFeed({ alerts }: { alerts: Alert[] }) {
         ) : (
           <div className="space-y-3">
             {alerts.map((alert) => {
-              const config = severityConfig[alert.severity];
+              const config = severityConfig[alert.severity ?? "info"] || severityConfig.info;
               const Icon = config.icon;
               return (
                 <div key={alert.id} className="flex gap-3 items-start">
