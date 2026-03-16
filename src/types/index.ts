@@ -20,14 +20,14 @@ export interface Trial {
   id: string;
   trial_name: string;
   trial_phase: TrialPhase;
-  status: TrialStatus;
+  status: TrialStatus | null;
   start_date: string;
-  end_date?: string;
-  description?: string;
-  sponsor?: string;
-  protocol_number?: string;
-  created_at?: Date;
-  updated_at?: Date;
+  end_date?: string | null;
+  description?: string | null;
+  sponsor?: string | null;
+  protocol_number?: string | null;
+  created_at?: Date | null;
+  updated_at?: Date | null;
 }
 
 export interface Site {
@@ -38,14 +38,14 @@ export interface Site {
   country: string;
   activation_date: string;
   patient_capacity: number;
-  enrolled_patients: number;
-  samples_per_patient: number;
-  coordinator_name?: string;
-  coordinator_email?: string;
-  status: SiteStatus;
+  enrolled_patients: number | null;
+  samples_per_patient: number | null;
+  coordinator_name?: string | null;
+  coordinator_email?: string | null;
+  status: SiteStatus | null;
   trial?: Trial;
-  created_at?: Date;
-  updated_at?: Date;
+  created_at?: Date | null;
+  updated_at?: Date | null;
 }
 
 export interface Kit {
@@ -55,11 +55,11 @@ export interface Kit {
   manufacturing_date: string;
   expiry_date: string;
   quantity: number;
-  unit_cost?: string;
-  storage_requirements?: string;
-  status: KitStatus;
-  created_at?: Date;
-  updated_at?: Date;
+  unit_cost?: string | null;
+  storage_requirements?: string | null;
+  status: KitStatus | null;
+  created_at?: Date | null;
+  updated_at?: Date | null;
 }
 
 export interface Shipment {
@@ -68,15 +68,15 @@ export interface Shipment {
   kit_id: string;
   quantity: number;
   shipment_date: string;
-  expected_delivery_date?: string;
-  actual_delivery_date?: string;
-  tracking_number?: string;
-  status: ShipmentStatus;
-  notes?: string;
+  expected_delivery_date?: string | null;
+  actual_delivery_date?: string | null;
+  tracking_number?: string | null;
+  status: ShipmentStatus | null;
+  notes?: string | null;
   site?: Site;
   kit?: Kit;
-  created_at?: Date;
-  updated_at?: Date;
+  created_at?: Date | null;
+  updated_at?: Date | null;
 }
 
 export interface KitUsage {
@@ -84,15 +84,15 @@ export interface KitUsage {
   site_id: string;
   kit_id: string;
   kits_used: number;
-  kits_returned: number;
-  kits_wasted: number;
+  kits_returned: number | null;
+  kits_wasted: number | null;
   usage_date: string;
-  patient_count?: number;
-  notes?: string;
-  reported_by?: string;
+  patient_count?: number | null;
+  notes?: string | null;
+  reported_by?: string | null;
   site?: Site;
   kit?: Kit;
-  created_at?: Date;
+  created_at?: Date | null;
 }
 
 export interface DemandForecast {
@@ -103,22 +103,22 @@ export interface DemandForecast {
   predicted_demand: number;
   safety_stock: number;
   recommended_qty: number;
-  confidence_score?: string;
-  model_version?: string;
-  months_ahead?: number;
-  created_at?: Date;
+  confidence_score?: string | null;
+  model_version?: string | null;
+  months_ahead?: number | null;
+  created_at?: Date | null;
 }
 
 export interface Alert {
   id: string;
   alert_type: AlertType;
   severity: AlertSeverity;
-  entity_type?: string;
-  entity_id?: string;
+  entity_type?: string | null;
+  entity_id?: string | null;
   message: string;
-  is_resolved: boolean;
-  resolved_at?: Date;
-  created_at?: Date;
+  is_resolved: boolean | null;
+  resolved_at?: Date | null;
+  created_at?: Date | null;
 }
 
 export interface ApiResponse<T> {
