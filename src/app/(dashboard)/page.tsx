@@ -7,8 +7,20 @@ import { AlertFeed } from "@/components/dashboard/alert-feed";
 import { SiteUsageTable } from "@/components/dashboard/site-usage-table";
 import { getDashboardSummary } from "@/lib/data";
 
+const emptyData = {
+  total_shipped: 0, total_used: 0, total_wasted: 0, wastage_pct: 0,
+  shipped_trend: 0, used_trend: 0, wastage_trend: 0, wastage_pct_trend: 0,
+  monthly_wastage: [], expiry_buckets: [], site_usage: [], recent_alerts: [],
+  active_trials: 0, active_sites: 0, kits_expiring_30: 0, kits_expiring_60: 0,
+};
+
 export default async function DashboardPage() {
-  const data = await getDashboardSummary();
+  let data = emptyData;
+  try {
+    data = await getDashboardSummary();
+  } catch (e) {
+    console.error("[Dashboard] getDashboardSummary failed:", e);
+  }
 
   return (
     <div>
