@@ -1,6 +1,6 @@
 "use client";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, FlaskConical, MapPin, Package,
   Truck, ClipboardList, BarChart3, Bell, Activity,
@@ -18,8 +18,44 @@ const navItems = [
   { href: "/alerts", label: "Alerts", icon: Bell },
 ];
 
+function useCurrentPath() {
+  const [path, setPath] = useState("");
+
+  useEffect(() => {
+    setPath(window.location.pathname);
+
+    // Detect Next.js client-side navigation via History API
+    const orig = {
+      push: history.pushState.bind(history),
+      replace: history.replaceState.bind(history),
+    };
+
+    const update = () => setPath(window.location.pathname);
+
+    history.pushState = function (...args) {
+      orig.push(...args);
+      update();
+    };
+    history.replaceState = function (...args) {
+      orig.replace(...args);
+      update();
+    };
+
+    window.addEventListener("popstate", update);
+
+    return () => {
+      history.pushState = orig.push;
+      history.replaceState = orig.replace;
+      window.removeEventListener("popstate", update);
+    };
+  }, []);
+
+  return path;
+}
+
 export function Sidebar() {
-  const pathname = usePathname();
+  const pathname = useCurrentPath();
+
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-sidebar border-r border-sidebar-border">
       <div className="flex h-16 items-center gap-2 px-6 border-b border-sidebar-border">
@@ -31,7 +67,9 @@ export function Sidebar() {
       </div>
       <nav className="flex flex-col gap-1 p-3 mt-2">
         {navItems.map(({ href, label, icon: Icon }) => {
-          const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
+          const isActive = pathname
+            ? href === "/" ? pathname === "/" : pathname.startsWith(href)
+            : false;
           return (
             <Link
               key={href}
