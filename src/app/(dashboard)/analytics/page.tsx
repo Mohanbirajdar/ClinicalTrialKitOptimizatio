@@ -25,13 +25,16 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/analytics/dashboard")
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20000); // 20s client-side timeout
+
+    fetch("/api/analytics/dashboard", { signal: controller.signal })
       .then((r) => r.json())
-      .then((j) => {
-        setData(j.data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+      .then((j) => { setData(j.data); setLoading(false); })
+      .catch(() => setLoading(false))
+      .finally(() => clearTimeout(timeout));
+
+    return () => { controller.abort(); clearTimeout(timeout); };
   }, []);
 
   if (loading) {

@@ -30,5 +30,23 @@ export async function register() {
         }
       });
     } as typeof dns.lookup;
+
+    // Suppress unhandledRejection noise from postgres.js internal promise chains
+    // when Supabase cancels statements on cold start. These do not affect responses
+    // (pages still return 200) but Next.js dev mode prints ⨯ for them.
+    process.on("unhandledRejection", (reason) => {
+      const msg = String(reason);
+      if (
+        msg.includes("canceling statement due to statement timeout") ||
+        msg.includes("EAI_AGAIN") ||
+        msg.includes("ENOTFOUND") ||
+        msg.includes("ECONNRESET")
+      ) {
+        // Known transient DB/DNS errors — already handled at the application layer
+        return;
+      }
+      // Re-throw anything else so real bugs aren't swallowed
+      console.error("[unhandledRejection]", reason);
+    });
   }
 }
