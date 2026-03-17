@@ -23,7 +23,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const sixMonthsAgo = subMonths(new Date(), 6);
     const historicalRows = await db
       .select({
-        month: sql<string>`DATE_FORMAT(usage_date,'%Y-%m')`,
+        month: sql<string>`TO_CHAR(usage_date, 'YYYY-MM')`,
         total: sql<number>`SUM(kits_used)`,
       })
       .from(kitUsage)
@@ -33,8 +33,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
           gte(kitUsage.usage_date, sixMonthsAgo.toISOString().split("T")[0])
         )
       )
-      .groupBy(sql`DATE_FORMAT(usage_date,'%Y-%m')`)
-      .orderBy(sql`DATE_FORMAT(usage_date,'%Y-%m')`);
+      .groupBy(sql`TO_CHAR(usage_date, 'YYYY-MM')`)
+      .orderBy(sql`TO_CHAR(usage_date, 'YYYY-MM')`);
 
     const historicalUsage = historicalRows.map((r) => Number(r.total));
 
