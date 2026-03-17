@@ -11,11 +11,11 @@ const isProduction = process.env.NODE_ENV === "production";
 const conn =
   globalForDb.conn ??
   postgres(process.env.DATABASE_URL!, {
-    max: isProduction ? 5 : 10,   // allow parallel queries in production
+    max: 1,                       // 1 connection per serverless instance
     ssl: "require",
     prepare: false,               // required for Supabase transaction pooler (port 6543)
-    connect_timeout: 15,          // fail fast if can't connect within 15s
-    idle_timeout: 20,             // release idle connections after 20s
+    connect_timeout: 30,
+    idle_timeout: 30,
   });
 
 if (process.env.NODE_ENV !== "production") globalForDb.conn = conn;

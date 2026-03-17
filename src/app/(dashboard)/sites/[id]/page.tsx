@@ -9,8 +9,9 @@ import { formatDate } from "@/lib/utils";
 import { getSiteById } from "@/lib/data";
 
 export default async function SiteDetailPage({ params }: { params: { id: string } }) {
-  const site = await getSiteById(params.id);
-  if (!site) return <div className="p-6">Site not found</div>;
+  let site: Awaited<ReturnType<typeof getSiteById>> = undefined;
+  try { site = await getSiteById(params.id); } catch (e) { console.error("[SiteDetail]", e); }
+  if (!site) return <div className="p-6 text-muted-foreground">Site not found or failed to load.</div>;
 
   const enrollmentPct = Math.round((site.enrolled_patients / site.patient_capacity) * 100);
 

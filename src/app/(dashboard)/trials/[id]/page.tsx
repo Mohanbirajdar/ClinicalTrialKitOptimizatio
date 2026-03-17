@@ -10,8 +10,9 @@ import { formatDate } from "@/lib/utils";
 import { getTrialById } from "@/lib/data";
 
 export default async function TrialDetailPage({ params }: { params: { id: string } }) {
-  const trial = await getTrialById(params.id);
-  if (!trial) return <div className="p-6">Trial not found</div>;
+  let trial: Awaited<ReturnType<typeof getTrialById>> = undefined;
+  try { trial = await getTrialById(params.id); } catch (e) { console.error("[TrialDetail]", e); }
+  if (!trial) return <div className="p-6 text-muted-foreground">Trial not found or failed to load.</div>;
 
   return (
     <div>
