@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { trials, sites, kits, shipments, kitUsage, alerts } from "@/db/schema";
 import { sql, eq, and, lt, gt, desc, gte } from "drizzle-orm";
 import { successResponse, serverError } from "@/lib/api-response";
+import { withTimeout } from "@/lib/data";
 import { addDays, subMonths, format } from "date-fns";
 
 export async function GET() {
@@ -27,7 +28,7 @@ export async function GET() {
       [activeTrials],
       [activeSites],
       recent_alerts,
-    ] = await Promise.all([
+    ] = await withTimeout(Promise.all([
       db.select({ total_shipped: sql<number>`COALESCE(SUM(quantity), 0)` })
         .from(shipments).where(sql`status != 'cancelled'::shipment_status`),
 
@@ -78,7 +79,7 @@ export async function GET() {
       db.select({ count: sql<number>`COUNT(*)` }).from(sites).where(eq(sites.status, "active")),
 
       db.select().from(alerts).where(eq(alerts.is_resolved, false)).orderBy(desc(alerts.created_at)).limit(5),
-    ]);
+    ]));
 
     const total_shipped = Number(totals?.total_shipped || 0);
     const total_used = Number(usageTotals?.total_used || 0);
