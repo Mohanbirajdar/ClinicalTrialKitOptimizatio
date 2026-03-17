@@ -119,7 +119,7 @@ export async function getDashboardSummary() {
   const [shipTotals] = await db
     .select({ total: sql<number>`COALESCE(SUM(quantity), 0)` })
     .from(shipments)
-    .where(sql`status != 'cancelled'`);
+    .where(sql`status != 'cancelled'::shipment_status`);
 
   const [usageTotals] = await db
     .select({
@@ -146,7 +146,7 @@ export async function getDashboardSummary() {
     const [ms] = await db
       .select({ total: sql<number>`COALESCE(SUM(quantity), 0)` })
       .from(shipments)
-      .where(sql`DATE_FORMAT(shipment_date,'%Y-%m') = ${mStr} AND status != 'cancelled'`);
+      .where(sql`TO_CHAR(shipment_date, 'YYYY-MM') = ${mStr} AND status != 'cancelled'`);
 
     const [mu] = await db
       .select({
@@ -154,7 +154,7 @@ export async function getDashboardSummary() {
         wasted: sql<number>`COALESCE(SUM(kits_wasted), 0)`,
       })
       .from(kitUsage)
-      .where(sql`DATE_FORMAT(usage_date,'%Y-%m') = ${mStr}`);
+      .where(sql`TO_CHAR(usage_date, 'YYYY-MM') = ${mStr}`);
 
     monthly_wastage.push({
       month: mLabel,
@@ -212,7 +212,7 @@ export async function getDashboardSummary() {
       kits_shipped: sql<number>`COALESCE(SUM(quantity), 0)`,
     })
     .from(shipments)
-    .where(sql`status != 'cancelled'`)
+    .where(sql`status != 'cancelled'::shipment_status`)
     .groupBy(shipments.site_id);
 
   const site_usage = allSitesList.map((s) => {
