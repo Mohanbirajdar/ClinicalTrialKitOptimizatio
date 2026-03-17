@@ -110,6 +110,10 @@ export async function getAllUsage(site_id?: string) {
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
 export function withTimeout<T>(promise: Promise<T>, ms = 25000): Promise<T> {
+  // Attach a no-op catch so late rejections from the original promise
+  // (e.g. the other 12 queries still in-flight after Promise.all rejects on the first failure)
+  // don't become unhandledRejections that trigger Next.js's error boundary crash.
+  promise.catch(() => {});
   return Promise.race([
     promise,
     new Promise<T>((_, reject) =>
