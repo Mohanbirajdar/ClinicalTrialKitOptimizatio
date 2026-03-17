@@ -107,16 +107,18 @@ export async function getAllUsage(site_id?: string) {
   });
 }
 
-// ─── DASHBOARD ───────────────────────────────────────────────────────────────
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
 
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+function withTimeout<T>(promise: Promise<T>, ms = 8000): Promise<T> {
   return Promise.race([
     promise,
-    new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error(`Query timed out after ${ms}ms`)), ms)
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`DB query timed out after ${ms}ms`)), ms)
     ),
   ]);
 }
+
+// ─── DASHBOARD ───────────────────────────────────────────────────────────────
 
 export async function getDashboardSummary() {
   const today = new Date();
@@ -125,7 +127,7 @@ export async function getDashboardSummary() {
   const d60 = addDays(today, 60).toISOString().split("T")[0];
   const d180 = subMonths(today, 6).toISOString().split("T")[0];
 
-  // Run all independent queries in parallel with a 20s timeout
+  // Run all independent queries in parallel
   const [
     [shipTotals],
     [usageTotals],
@@ -213,7 +215,7 @@ export async function getDashboardSummary() {
 
     // recent unresolved alerts
     db.select().from(alerts).where(eq(alerts.is_resolved, false)).orderBy(desc(alerts.created_at)).limit(5),
-  ]), 20000);
+  ]));
 
   const total_shipped = Number(shipTotals?.total || 0);
   const total_used = Number(usageTotals?.used || 0);
