@@ -17,7 +17,8 @@ const statusColors: Record<string, "default" | "success" | "warning" | "destruct
 };
 
 export default async function InventoryPage() {
-  const kits = await getAllKits();
+  let kits: Awaited<ReturnType<typeof getAllKits>> = [];
+  try { kits = await getAllKits(); } catch (e) { console.error("[InventoryPage]", e); }
   const totalUnits = kits.reduce((a, k) => a + k.quantity, 0);
   const expiringCount = kits.filter(k => {
     const days = Math.floor((new Date(k.expiry_date).getTime() - Date.now()) / 86400000);

@@ -9,7 +9,8 @@ import { formatDate } from "@/lib/utils";
 import { getAllUsage } from "@/lib/data";
 
 export default async function UsagePage() {
-  const usage = await getAllUsage();
+  let usage: Awaited<ReturnType<typeof getAllUsage>> = [];
+  try { usage = await getAllUsage(); } catch (e) { console.error("[UsagePage]", e); }
   const totalUsed = usage.reduce((a, u) => a + u.kits_used, 0);
   const totalWasted = usage.reduce((a, u) => a + u.kits_wasted, 0);
   const totalReturned = usage.reduce((a, u) => a + u.kits_returned, 0);

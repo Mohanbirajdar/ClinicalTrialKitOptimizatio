@@ -18,7 +18,8 @@ const statusColors: Record<string, "default" | "success" | "warning" | "destruct
 };
 
 export default async function ShipmentsPage() {
-  const shipments = await getAllShipments();
+  let shipments: Awaited<ReturnType<typeof getAllShipments>> = [];
+  try { shipments = await getAllShipments(); } catch (e) { console.error("[ShipmentsPage]", e); }
 
   return (
     <div>

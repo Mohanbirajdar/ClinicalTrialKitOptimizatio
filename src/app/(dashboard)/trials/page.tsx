@@ -24,7 +24,8 @@ const statusColors: Record<string, "default" | "success" | "warning" | "destruct
 };
 
 export default async function TrialsPage() {
-  const trials = await getAllTrials();
+  let trials: Awaited<ReturnType<typeof getAllTrials>> = [];
+  try { trials = await getAllTrials(); } catch (e) { console.error("[TrialsPage]", e); }
 
   return (
     <div>

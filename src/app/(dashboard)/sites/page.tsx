@@ -10,7 +10,8 @@ import { formatDate } from "@/lib/utils";
 import { getAllSites } from "@/lib/data";
 
 export default async function SitesPage() {
-  const sites = await getAllSites();
+  let sites: Awaited<ReturnType<typeof getAllSites>> = [];
+  try { sites = await getAllSites(); } catch (e) { console.error("[SitesPage]", e); }
 
   return (
     <div>

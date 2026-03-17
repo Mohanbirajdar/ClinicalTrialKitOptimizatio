@@ -7,8 +7,11 @@ import { AlertTriangle } from "lucide-react";
 import { formatDate, getExpiryStatus } from "@/lib/utils";
 import { getExpiringKits } from "@/lib/data";
 
+const emptyExpiring = { kits: [], grouped: { expired: [], within_30: [], within_60: [] }, total: 0 };
+
 export default async function ExpiringKitsPage() {
-  const data = await getExpiringKits(60);
+  let data = emptyExpiring;
+  try { data = await getExpiringKits(60); } catch (e) { console.error("[ExpiringKitsPage]", e); }
   const { grouped } = data;
 
   return (
