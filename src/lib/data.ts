@@ -131,15 +131,18 @@ export async function getDashboardSummary() {
   const d60 = addDays(today, 60).toISOString().split("T")[0];
   const d180 = subMonths(today, 6).toISOString().split("T")[0];
 
-  // Run all independent queries in parallel
+  // silence() attaches a no-op .catch() to each individual query promise so that
+  // when Promise.all rejects early (first failure), the remaining in-flight promises
+  // don't surface as unhandledRejections and trigger Next.js's error boundary crash.
+  const silence = <T>(p: Promise<T>): Promise<T> => { p.catch(() => {}); return p; };
+
+  // Run all independent queries in parallel (11 queries, down from 13 — expiry merged)
   const [
     [shipTotals],
     [usageTotals],
     monthlyShipRows,
     monthlyUsageRows,
-    [exp30],
-    [exp60],
-    [expired],
+    [expiryBuckets],       // merged: exp30 + exp60 + expired in a single query
     allSitesList,
     siteUsageRows,
     siteShipRows,
@@ -148,77 +151,69 @@ export async function getDashboardSummary() {
     recent_alerts,
   ] = await withTimeout(Promise.all([
     // total shipped
-    db.select({ total: sql<number>`COALESCE(SUM(quantity), 0)` })
+    silence(db.select({ total: sql<number>`COALESCE(SUM(quantity), 0)` })
       .from(shipments)
-      .where(sql`status != 'cancelled'::shipment_status`),
+      .where(sql`status != 'cancelled'::shipment_status`)),
 
     // total used/wasted
-    db.select({
+    silence(db.select({
       used: sql<number>`COALESCE(SUM(kits_used), 0)`,
       wasted: sql<number>`COALESCE(SUM(kits_wasted), 0)`,
-    }).from(kitUsage),
+    }).from(kitUsage)),
 
-    // monthly shipments (last 6 months) — single GROUP BY query
-    db.select({
+    // monthly shipments (last 6 months)
+    silence(db.select({
       month: sql<string>`TO_CHAR(shipment_date, 'YYYY-MM')`,
       total: sql<number>`COALESCE(SUM(quantity), 0)`,
     })
       .from(shipments)
       .where(sql`status != 'cancelled'::shipment_status AND shipment_date >= ${d180}`)
-      .groupBy(sql`TO_CHAR(shipment_date, 'YYYY-MM')`),
+      .groupBy(sql`TO_CHAR(shipment_date, 'YYYY-MM')`)),
 
-    // monthly usage (last 6 months) — single GROUP BY query
-    db.select({
+    // monthly usage (last 6 months)
+    silence(db.select({
       month: sql<string>`TO_CHAR(usage_date, 'YYYY-MM')`,
       used: sql<number>`COALESCE(SUM(kits_used), 0)`,
       wasted: sql<number>`COALESCE(SUM(kits_wasted), 0)`,
     })
       .from(kitUsage)
       .where(sql`usage_date >= ${d180}`)
-      .groupBy(sql`TO_CHAR(usage_date, 'YYYY-MM')`),
+      .groupBy(sql`TO_CHAR(usage_date, 'YYYY-MM')`)),
 
-    // kits expiring < 30 days
-    db.select({
-      count: sql<number>`COUNT(*)`,
-      qty: sql<number>`COALESCE(SUM(quantity), 0)`,
-    }).from(kits).where(and(lt(kits.expiry_date, d30), gte(kits.expiry_date, today_str), gt(kits.quantity, 0))),
-
-    // kits expiring 30-60 days
-    db.select({
-      count: sql<number>`COUNT(*)`,
-      qty: sql<number>`COALESCE(SUM(quantity), 0)`,
-    }).from(kits).where(and(lt(kits.expiry_date, d60), gte(kits.expiry_date, d30), gt(kits.quantity, 0))),
-
-    // expired kits
-    db.select({
-      count: sql<number>`COUNT(*)`,
-      qty: sql<number>`COALESCE(SUM(quantity), 0)`,
-    }).from(kits).where(and(lt(kits.expiry_date, today_str), gt(kits.quantity, 0))),
+    // all expiry buckets in one query using FILTER aggregates (3 queries → 1)
+    silence(db.select({
+      exp30_count:  sql<number>`COUNT(*) FILTER (WHERE expiry_date >= ${today_str} AND expiry_date < ${d30} AND quantity > 0)`,
+      exp30_qty:    sql<number>`COALESCE(SUM(quantity) FILTER (WHERE expiry_date >= ${today_str} AND expiry_date < ${d30} AND quantity > 0), 0)`,
+      exp60_count:  sql<number>`COUNT(*) FILTER (WHERE expiry_date >= ${d30} AND expiry_date < ${d60} AND quantity > 0)`,
+      exp60_qty:    sql<number>`COALESCE(SUM(quantity) FILTER (WHERE expiry_date >= ${d30} AND expiry_date < ${d60} AND quantity > 0), 0)`,
+      expired_count: sql<number>`COUNT(*) FILTER (WHERE expiry_date < ${today_str} AND quantity > 0)`,
+      expired_qty:   sql<number>`COALESCE(SUM(quantity) FILTER (WHERE expiry_date < ${today_str} AND quantity > 0), 0)`,
+    }).from(kits)),
 
     // sites list
-    db.select().from(sites).limit(10),
+    silence(db.select().from(sites).limit(10)),
 
     // site usage aggregates
-    db.select({
+    silence(db.select({
       site_id: kitUsage.site_id,
       kits_used: sql<number>`COALESCE(SUM(kits_used), 0)`,
       kits_wasted: sql<number>`COALESCE(SUM(kits_wasted), 0)`,
-    }).from(kitUsage).groupBy(kitUsage.site_id),
+    }).from(kitUsage).groupBy(kitUsage.site_id)),
 
     // site shipment aggregates
-    db.select({
+    silence(db.select({
       site_id: shipments.site_id,
       kits_shipped: sql<number>`COALESCE(SUM(quantity), 0)`,
-    }).from(shipments).where(sql`status != 'cancelled'::shipment_status`).groupBy(shipments.site_id),
+    }).from(shipments).where(sql`status != 'cancelled'::shipment_status`).groupBy(shipments.site_id)),
 
     // active trials count
-    db.select({ count: sql<number>`COUNT(*)` }).from(trials).where(eq(trials.status, "active")),
+    silence(db.select({ count: sql<number>`COUNT(*)` }).from(trials).where(eq(trials.status, "active"))),
 
     // active sites count
-    db.select({ count: sql<number>`COUNT(*)` }).from(sites).where(eq(sites.status, "active")),
+    silence(db.select({ count: sql<number>`COUNT(*)` }).from(sites).where(eq(sites.status, "active"))),
 
     // recent unresolved alerts
-    db.select().from(alerts).where(eq(alerts.is_resolved, false)).orderBy(desc(alerts.created_at)).limit(5),
+    silence(db.select().from(alerts).where(eq(alerts.is_resolved, false)).orderBy(desc(alerts.created_at)).limit(5)),
   ]));
 
   const total_shipped = Number(shipTotals?.total || 0);
@@ -244,9 +239,9 @@ export async function getDashboardSummary() {
   }
 
   const expiry_buckets = [
-    { range: "Expired", count: Number(expired?.count || 0), quantity: Number(expired?.qty || 0) },
-    { range: "< 30 days", count: Number(exp30?.count || 0), quantity: Number(exp30?.qty || 0) },
-    { range: "30-60 days", count: Number(exp60?.count || 0), quantity: Number(exp60?.qty || 0) },
+    { range: "Expired",    count: Number(expiryBuckets?.expired_count || 0), quantity: Number(expiryBuckets?.expired_qty || 0) },
+    { range: "< 30 days",  count: Number(expiryBuckets?.exp30_count   || 0), quantity: Number(expiryBuckets?.exp30_qty   || 0) },
+    { range: "30-60 days", count: Number(expiryBuckets?.exp60_count   || 0), quantity: Number(expiryBuckets?.exp60_qty   || 0) },
   ];
 
   const site_usage = allSitesList.map((s) => {
@@ -281,7 +276,7 @@ export async function getDashboardSummary() {
     recent_alerts: recent_alerts as Alert[],
     active_trials: Number(activeTrialsRow?.count || 0),
     active_sites: Number(activeSitesRow?.count || 0),
-    kits_expiring_30: Number(exp30?.count || 0),
-    kits_expiring_60: Number(exp60?.count || 0),
+    kits_expiring_30: Number(expiryBuckets?.exp30_count || 0),
+    kits_expiring_60: Number(expiryBuckets?.exp60_count || 0),
   };
 }
