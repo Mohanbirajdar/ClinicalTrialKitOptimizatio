@@ -17,15 +17,15 @@ export async function GET(req: NextRequest) {
 
     const wastageData = await db
       .select({
-        month: sql<string>`DATE_FORMAT(usage_date, '%Y-%m')`,
+        month: sql<string>`TO_CHAR(usage_date, 'YYYY-MM')`,
         total_used: sql<number>`SUM(kits_used)`,
         total_wasted: sql<number>`SUM(kits_wasted)`,
         total_returned: sql<number>`SUM(kits_returned)`,
       })
       .from(kitUsage)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .groupBy(sql`DATE_FORMAT(usage_date, '%Y-%m')`)
-      .orderBy(sql`DATE_FORMAT(usage_date, '%Y-%m')`);
+      .groupBy(sql`TO_CHAR(usage_date, 'YYYY-MM')`)
+      .orderBy(sql`TO_CHAR(usage_date, 'YYYY-MM')`);
 
     return successResponse(wastageData);
   } catch (e) {
