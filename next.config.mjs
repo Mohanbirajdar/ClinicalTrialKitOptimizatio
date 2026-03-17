@@ -2,6 +2,7 @@
 const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ["postgres"],
+    instrumentationHook: true,
   },
   typescript: {
     ignoreBuildErrors: true,
