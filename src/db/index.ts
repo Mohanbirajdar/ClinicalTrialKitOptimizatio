@@ -14,6 +14,9 @@ const conn =
     prepare: false,               // required for Supabase transaction pooler (port 6543)
     connect_timeout: 30,
     idle_timeout: 30,
+    connection: {
+      statement_timeout: 55000,   // override Supabase's default 8s limit
+    },
   });
 
 if (process.env.NODE_ENV !== "production") globalForDb.conn = conn;

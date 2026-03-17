@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+export const revalidate = 30;
 import { Topbar } from "@/components/layout/topbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";

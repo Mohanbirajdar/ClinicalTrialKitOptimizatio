@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 import { Topbar } from "@/components/layout/topbar";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { WastageChart } from "@/components/dashboard/wastage-chart";
