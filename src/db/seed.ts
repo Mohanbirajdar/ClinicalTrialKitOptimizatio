@@ -183,32 +183,27 @@ async function seed() {
   const alertRows: (typeof alerts.$inferInsert)[] = [
     {
       id: uid(), alert_type: "expiry_warning", severity: "warning",
-      title: "Kit Lot Expiring in 22 Days",
-      message: "LOT-BDK-2023-OLD has 45 units expiring in 22 days. Expedite usage or arrange return.",
+      message: "Kit Lot Expiring in 22 Days: LOT-BDK-2023-OLD has 45 units expiring in 22 days. Expedite usage or arrange return.",
       entity_type: "kit", entity_id: k4, is_resolved: false,
     },
     {
       id: uid(), alert_type: "expiry_warning", severity: "critical",
-      title: "Kit Lot Already Expired",
-      message: "LOT-PCK-2024-EXP expired 5 days ago. 12 units must be quarantined immediately.",
+      message: "Kit Lot Already Expired: LOT-PCK-2024-EXP expired 5 days ago. 12 units must be quarantined immediately.",
       entity_type: "kit", entity_id: k5, is_resolved: false,
     },
     {
       id: uid(), alert_type: "low_stock", severity: "warning",
-      title: "Low Stock Warning — Blood Draw Kit",
-      message: "LOT-BDK-2023-OLD is at 45 units (below threshold of 50). Reorder recommended.",
+      message: "Low Stock Warning — Blood Draw Kit: LOT-BDK-2023-OLD is at 45 units (below threshold of 50). Reorder recommended.",
       entity_type: "kit", entity_id: k4, is_resolved: false,
     },
     {
       id: uid(), alert_type: "shipment_delayed", severity: "info",
-      title: "Shipment In Transit",
-      message: "Recent shipment to Boston Medical Center is currently in transit.",
+      message: "Shipment In Transit: Recent shipment to Boston Medical Center is currently in transit.",
       entity_type: "shipment", entity_id: undefined, is_resolved: false,
     },
     {
       id: uid(), alert_type: "expiry_warning", severity: "info",
-      title: "Urine Kit Lot Expiring in 150 Days",
-      message: "LOT-USK-2024-002 has 260 units expiring in 5 months. Plan distribution.",
+      message: "Urine Kit Lot Expiring in 150 Days: LOT-USK-2024-002 has 260 units expiring in 5 months. Plan distribution.",
       entity_type: "kit", entity_id: k2, is_resolved: true,
     },
   ];

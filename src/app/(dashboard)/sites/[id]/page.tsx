@@ -13,7 +13,7 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
   try { site = await getSiteById(params.id); } catch (e) { console.error("[SiteDetail]", e); }
   if (!site) return <div className="p-6 text-muted-foreground">Site not found or failed to load.</div>;
 
-  const enrollmentPct = Math.round((site.enrolled_patients / site.patient_capacity) * 100);
+  const enrollmentPct = Math.round(((site.enrolled_patients ?? 0) / site.patient_capacity) * 100);
 
   return (
     <div>
@@ -55,8 +55,8 @@ export default async function SiteDetailPage({ params }: { params: { id: string 
               </div>
               <div className="pt-2 border-t text-sm">
                 <p className="text-muted-foreground">Estimated Kit Demand</p>
-                <p className="text-2xl font-bold text-primary">{site.enrolled_patients * site.samples_per_patient}</p>
-                <p className="text-xs text-muted-foreground">{site.enrolled_patients} patients × {site.samples_per_patient} samples</p>
+                <p className="text-2xl font-bold text-primary">{(site.enrolled_patients ?? 0) * (site.samples_per_patient ?? 0)}</p>
+                <p className="text-xs text-muted-foreground">{site.enrolled_patients ?? 0} patients × {site.samples_per_patient ?? 0} samples</p>
               </div>
             </CardContent>
           </Card>

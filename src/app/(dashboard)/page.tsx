@@ -1,4 +1,4 @@
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 import { Topbar } from "@/components/layout/topbar";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { WastageChart } from "@/components/dashboard/wastage-chart";
@@ -7,7 +7,7 @@ import { AlertFeed } from "@/components/dashboard/alert-feed";
 import { SiteUsageTable } from "@/components/dashboard/site-usage-table";
 import { getDashboardSummary } from "@/lib/data";
 
-const emptyData = {
+const emptyData: Awaited<ReturnType<typeof getDashboardSummary>> = {
   total_shipped: 0, total_used: 0, total_wasted: 0, wastage_pct: 0,
   shipped_trend: 0, used_trend: 0, wastage_trend: 0, wastage_pct_trend: 0,
   monthly_wastage: [], expiry_buckets: [], site_usage: [], recent_alerts: [],

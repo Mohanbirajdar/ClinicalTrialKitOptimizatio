@@ -137,10 +137,10 @@ export default function SiteForecastPage() {
             {site && (
               <div className="text-sm text-muted-foreground bg-slate-50 rounded p-3">
                 <strong>Formula preview:</strong>{" "}
-                {site.enrolled_patients} patients × {site.samples_per_patient} samples ×{" "}
+                {site.enrolled_patients ?? 0} patients × {site.samples_per_patient ?? 0} samples ×{" "}
                 {monthsAhead} months ={" "}
                 <strong className="text-foreground">
-                  {site.enrolled_patients * site.samples_per_patient * Number(monthsAhead)}{" "}
+                  {(site.enrolled_patients ?? 0) * (site.samples_per_patient ?? 0) * Number(monthsAhead)}{" "}
                   base kits
                 </strong>{" "}
                 + 20% safety stock

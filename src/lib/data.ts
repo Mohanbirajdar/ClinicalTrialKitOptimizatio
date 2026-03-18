@@ -150,7 +150,7 @@ export async function getDashboardSummary() {
     [activeSitesRow],
     recent_alerts,
   ] = await withTimeout(Promise.all([
-    // total shipped
+    // total shipped (timeout raised to 55s to allow for cold-start connection pool warm-up)
     silence(db.select({ total: sql<number>`COALESCE(SUM(quantity), 0)` })
       .from(shipments)
       .where(sql`status != 'cancelled'::shipment_status`)),
@@ -214,7 +214,7 @@ export async function getDashboardSummary() {
 
     // recent unresolved alerts
     silence(db.select().from(alerts).where(eq(alerts.is_resolved, false)).orderBy(desc(alerts.created_at)).limit(5)),
-  ]));
+  ]), 55000);
 
   const total_shipped = Number(shipTotals?.total || 0);
   const total_used = Number(usageTotals?.used || 0);

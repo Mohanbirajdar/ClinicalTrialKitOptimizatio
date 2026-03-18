@@ -12,8 +12,8 @@ export default async function UsagePage() {
   let usage: Awaited<ReturnType<typeof getAllUsage>> = [];
   try { usage = await getAllUsage(); } catch (e) { console.error("[UsagePage]", e); }
   const totalUsed = usage.reduce((a, u) => a + u.kits_used, 0);
-  const totalWasted = usage.reduce((a, u) => a + u.kits_wasted, 0);
-  const totalReturned = usage.reduce((a, u) => a + u.kits_returned, 0);
+  const totalWasted = usage.reduce((a, u) => a + (u.kits_wasted ?? 0), 0);
+  const totalReturned = usage.reduce((a, u) => a + (u.kits_returned ?? 0), 0);
 
   return (
     <div>
@@ -84,7 +84,7 @@ export default async function UsagePage() {
                       <TableCell className="text-right font-bold text-green-700">{u.kits_used}</TableCell>
                       <TableCell className="text-right text-blue-600">{u.kits_returned}</TableCell>
                       <TableCell className="text-right">
-                        <span className={u.kits_wasted > 0 ? "text-red-600 font-bold" : "text-muted-foreground"}>
+                        <span className={(u.kits_wasted ?? 0) > 0 ? "text-red-600 font-bold" : "text-muted-foreground"}>
                           {u.kits_wasted}
                         </span>
                       </TableCell>

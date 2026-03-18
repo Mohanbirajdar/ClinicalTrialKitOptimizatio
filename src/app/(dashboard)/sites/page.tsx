@@ -72,7 +72,7 @@ export default async function SitesPage() {
                           <div className="w-16 h-1.5 bg-gray-200 rounded-full">
                             <div
                               className="h-1.5 bg-primary rounded-full"
-                              style={{ width: `${Math.min(100, (site.enrolled_patients / site.patient_capacity) * 100)}%` }}
+                              style={{ width: `${Math.min(100, ((site.enrolled_patients ?? 0) / site.patient_capacity) * 100)}%` }}
                             />
                           </div>
                         </div>
