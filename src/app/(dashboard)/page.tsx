@@ -1,5 +1,5 @@
 export const dynamic = "force-dynamic";
-import dynamic from "next/dynamic";
+import nextDynamic from "next/dynamic";
 import { Topbar } from "@/components/layout/topbar";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { AlertFeed } from "@/components/dashboard/alert-feed";
@@ -7,11 +7,11 @@ import { SiteUsageTable } from "@/components/dashboard/site-usage-table";
 import { getDashboardSummary } from "@/lib/data";
 
 // Recharts uses browser APIs - disable SSR to prevent PathnameContext crash
-const WastageChart = dynamic(
+const WastageChart = nextDynamic(
   () => import("@/components/dashboard/wastage-chart").then(m => ({ default: m.WastageChart })),
   { ssr: false, loading: () => <div className="h-64 bg-muted animate-pulse rounded-lg" /> }
 );
-const ExpiryHeatmap = dynamic(
+const ExpiryHeatmap = nextDynamic(
   () => import("@/components/dashboard/expiry-heatmap").then(m => ({ default: m.ExpiryHeatmap })),
   { ssr: false, loading: () => <div className="h-64 bg-muted animate-pulse rounded-lg" /> }
 );
