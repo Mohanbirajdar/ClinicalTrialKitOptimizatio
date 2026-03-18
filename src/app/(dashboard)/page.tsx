@@ -1,11 +1,20 @@
 export const dynamic = "force-dynamic";
+import dynamic from "next/dynamic";
 import { Topbar } from "@/components/layout/topbar";
 import { KpiCard } from "@/components/dashboard/kpi-card";
-import { WastageChart } from "@/components/dashboard/wastage-chart";
-import { ExpiryHeatmap } from "@/components/dashboard/expiry-heatmap";
 import { AlertFeed } from "@/components/dashboard/alert-feed";
 import { SiteUsageTable } from "@/components/dashboard/site-usage-table";
 import { getDashboardSummary } from "@/lib/data";
+
+// Recharts uses browser APIs - disable SSR to prevent PathnameContext crash
+const WastageChart = dynamic(
+  () => import("@/components/dashboard/wastage-chart").then(m => ({ default: m.WastageChart })),
+  { ssr: false, loading: () => <div className="h-64 bg-muted animate-pulse rounded-lg" /> }
+);
+const ExpiryHeatmap = dynamic(
+  () => import("@/components/dashboard/expiry-heatmap").then(m => ({ default: m.ExpiryHeatmap })),
+  { ssr: false, loading: () => <div className="h-64 bg-muted animate-pulse rounded-lg" /> }
+);
 
 const emptyData: Awaited<ReturnType<typeof getDashboardSummary>> = {
   total_shipped: 0, total_used: 0, total_wasted: 0, wastage_pct: 0,

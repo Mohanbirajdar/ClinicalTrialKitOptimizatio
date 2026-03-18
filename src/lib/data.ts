@@ -214,7 +214,7 @@ export async function getDashboardSummary() {
 
     // recent unresolved alerts
     silence(db.select().from(alerts).where(eq(alerts.is_resolved, false)).orderBy(desc(alerts.created_at)).limit(5)),
-  ]), 55000);
+  ]), 8000);
 
   const total_shipped = Number(shipTotals?.total || 0);
   const total_used = Number(usageTotals?.used || 0);
